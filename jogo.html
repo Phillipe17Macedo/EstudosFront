@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            background-color: #70c5ce;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            border: 2px solid #000;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        #bird {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #f9c74f;
+            top: 50%;
+            left: 50px;
+            transform: translateY(-50%);
+            border-radius: 50%;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 80px;
+            height: 300px;
+            background-color: #4d908e;
+            border-radius: 10px;
+        }
+
+        #score {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .game-over h2 {
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .game-over button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f9c74f;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="bird"></div>
+    </div>
+    <div id="score">Score: 0</div>
+
+    <div class="game-over">
+        <h2>Game Over!</h2>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bird = document.getElementById("bird");
+            const gameContainer = document.getElementById("game-container");
+            const scoreElement = document.getElementById("score");
+            const gameOverElement = document.querySelector(".game-over");
+
+            let birdTop = 225;
+            let gravity = 2;
+            let isGameOver = false;
+            let score = 0;
+
+            function jump() {
+                if (birdTop > 20) {
+                    birdTop -= 60;
+                }
+            }
+
+            function generatePipe() {
+                const pipe = document.createElement("div");
+                pipe.classList.add("pipe");
+                pipe.style.left = "400px";
+                pipe.style.top = Math.floor(Math.random() * 200) + 50 + "px";
+                gameContainer.appendChild(pipe);
+
+                function movePipe() {
+                    if (isGameOver) return;
+
+                    const pipes = document.getElementsByClassName("pipe");
+                    for (let i = 0; i < pipes.length; i++) {
+                        const pipe = pipes[i];
+                        const pipeLeft = parseInt(pipe.style.left);
+                        pipe.style.left = pipeLeft - 5 + "px";
+
+                        if (pipeLeft < -80) {
+                            pipe.remove();
+                        }
+
+                        if (
+                            pipeLeft > 0 &&
+                            pipeLeft < 60 &&
+                            birdTop < parseInt(pipe.style.top) + 300 &&
+                            birdTop > parseInt(pipe.style.top) - 50
+                        ) {
+                            gameOver();
+                        }
+                    }
+
+                    requestAnimationFrame(movePipe);
+                }
+
+                movePipe();
+            }
+
+            function gameOver() {
+            isGameOver = true;
+            gameOverElement.style.display = "block";
+            playAgainButton.style.display = "block";
+            }
+
+            function restartGame() {
+                location.reload();
+            }
+
+            function gameLoop() {
+                if (isGameOver) return;
+
+                birdTop += gravity;
+                bird.style.top = birdTop + "px";
+
+                if (birdTop > 475) {
+                    gameOver();
+                }
+
+                const pipes = document.getElementsByClassName("pipe");
+                if (pipes.length === 0) {
+                    generatePipe();
+                    score++;
+                    scoreElement.innerHTML = "Score: " + score;
+                }
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            gameLoop();
+
+            document.addEventListener("keydown", jump);
+            gameContainer.addEventListener("click", jump);
+        });
+    </script>
+</body>
+</html>
